@@ -1,17 +1,29 @@
-import socket, threading, time
+import socket, threading, time, os, sys, json
 
 _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-_socket.bind(("127.0.0.1", 6008))
+_path = sys.path[0]
+_configPath = _path[0:-len(os.path.basename(_path))] + "config.json"
+
+_config = {}
+with open(_configPath, "r") as _file:
+    _config = json.loads(_file.read())
+
+_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+_socket.bind((_config.get("server"), _config.get("port")))
 
 _socket.listen(5)
 print("waiting for connection ...")
 
+os.mkdir(sys.path[0] + "/_temp")
+TaskList = ["ls", "ls", "ls"]
+
 def tcplink(sock, addr):
     print('Accept new connection from %s:%s...' % addr)
-    #sock.send(b'Welcome!')
     _taskOpr = sock.recv(1024).decode("utf-8")
-    if cmp(_taskOpr, "requestTask"):
+    sock.send(b'Welcome!')
+    if _taskOpr == "requestTask":
         while True:
             data = sock.recv(1024)
             time.sleep(1)
