@@ -19,9 +19,12 @@ while True:
     DEFAULT_BUFF_LEN = _socket.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
 
     _connectResult = _socket.connect_ex((_config.get("server"), _config.get("port")))
-    _socket.sendall(b"requestTask")
+    sendData(_socket, "requestTask")
 
-    _taskJson = _socket.recv(DEFAULT_BUFF_LEN).decode('utf-8')
-    _socket.sendall(_taskJson.encode("utf-8"))
+    _taskJson = recvData(_socket)
+
+    if _taskJson != "":
+        sendData(_socket, "success")
+        
     _socket.close()
     time.sleep(1)

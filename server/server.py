@@ -25,23 +25,29 @@ if not os.path.exists(sys.path[0] + "/_temp"):
 TaskList = ["ls", "ls", "ls"]
 def tcplink(sock, addr):
     print('Accept new connection from %s:%s...' % addr)
-    _taskOpr = recvData(sock, addr)
+    _taskOpr = recvData(sock)
+    print(_taskOpr)
     if _taskOpr == "requestTask":
-        print(len(TaskList))
         if len(TaskList) == 0:
+            sendData(sock, "")
             sock.close()
+            print('Connection from %s:%s closed.\n' % addr)
             return
 
-        sock.sendall(TaskList.pop(0).encode("utf-8"))
-        _result= sock.recv(DEFAULT_BUFF_LEN).decode("utf-8")
+        _task = TaskList.pop(0)
+        try:
+            sendData(sock, _task)
+            _result= recvData(sock)
+        except:
+            TaskList.append(_task)
+
         sock.close()
+        print('Connection from %s:%s closed.\n' % addr)
     elif _taskOpr == "pushTask":
         data = sock.recv(DEFAULT_BUFF_LEN).decode("utf-8")
         TaskList.append(data)
         sock.close()
-
-    print('Connection from %s:%s closed.\n' % addr)
-
+        print('Connection from %s:%s closed.\n' % addr)
 
 while True:
     sock, addr = _socket.accept()
